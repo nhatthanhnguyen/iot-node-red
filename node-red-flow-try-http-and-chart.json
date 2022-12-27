@@ -1,0 +1,319 @@
+[
+    {
+        "id": "8db04b315cc5de9b",
+        "type": "tab",
+        "label": "Flow 2",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "b0870838525b5648",
+        "type": "http request",
+        "z": "8db04b315cc5de9b",
+        "name": "",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "https://s3.amazonaws.com/grillo-openeew/records/country_code=mx/device_id=006/year=2018/month=02/day=16/hour=23/40.jsonl",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 310,
+        "y": 300,
+        "wires": [
+            [
+                "714521b575216970"
+            ]
+        ]
+    },
+    {
+        "id": "a43daa8fc1441bb3",
+        "type": "inject",
+        "z": "8db04b315cc5de9b",
+        "name": "Request",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 120,
+        "y": 300,
+        "wires": [
+            [
+                "b0870838525b5648"
+            ]
+        ]
+    },
+    {
+        "id": "714521b575216970",
+        "type": "function",
+        "z": "8db04b315cc5de9b",
+        "name": "Build quake charts",
+        "func": "var jsonl = msg.payload.toString().split('\\n');\nif (jsonl[1].includes(\"Error\")) {\n    msg.payload = jsonl[1];\n    return [null, null, null, msg];\n}\nvar Xchart = [{\n    \"series\": [\"X\"],\n    \"data\": [[]],\n    \"labels\": [\"\"]\n}];\nvar Ychart = [{\n    \"series\": [\"Y\"],\n    \"data\": [[]],\n    \"labels\": [\"\"]\n}];\nvar Zchart = [{\n    \"series\": [\"Z\"],\n    \"data\": [[]],\n    \"labels\": [\"\"]\n}];\n\nvar event = {};\nvar data = {};\nfor ( let i = 0; i < jsonl.length - 1; i++) {\n    event = JSON.parse(jsonl[i]);\n    for (let j = 0; j < event.x.length; j++) {\n        data = { \"x\": (event.device_t * 1000 + (j * 3)), \"y\": event.x[j] };\n        Xchart[0].data[0].push(data);\n        data = { \"x\": (event.device_t * 1000 + (j * 3)), \"y\": event.y[j] };\n        Ychart[0].data[0].push(data);\n        data = { \"x\": (event.device_t * 1000 + (j * 3)), \"y\": event.z[j] };\n        Zchart[0].data[0].push(data);\n    }\n}\nvar xmsg = {};\nvar ymsg = {};\nvar zmsg = {};\nxmsg.payload = Xchart;\nymsg.payload = Ychart;\nzmsg.payload = Zchart;\nreturn [xmsg, ymsg, zmsg, null];",
+        "outputs": 4,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 530,
+        "y": 300,
+        "wires": [
+            [
+                "e10e33185597b5bf"
+            ],
+            [
+                "c936bad3c405d852"
+            ],
+            [
+                "de50cbddaed42bb8"
+            ],
+            [
+                "267ee5d57f6bec65"
+            ]
+        ]
+    },
+    {
+        "id": "e10e33185597b5bf",
+        "type": "ui_chart",
+        "z": "8db04b315cc5de9b",
+        "name": "",
+        "group": "9f9b8980189f4305",
+        "order": 0,
+        "width": "18",
+        "height": "5",
+        "label": "X",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": "5",
+        "removeOlderPoints": "10000",
+        "removeOlderUnit": "60",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 830,
+        "y": 240,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "267ee5d57f6bec65",
+        "type": "ui_toast",
+        "z": "8db04b315cc5de9b",
+        "position": "top right",
+        "displayTime": "3",
+        "highlight": "",
+        "sendall": true,
+        "outputs": 0,
+        "ok": "OK",
+        "cancel": "",
+        "raw": false,
+        "className": "",
+        "topic": "",
+        "name": "",
+        "x": 830,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "e1851e402b5bf789",
+        "type": "inject",
+        "z": "8db04b315cc5de9b",
+        "name": "Set zero",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 240,
+        "y": 420,
+        "wires": [
+            [
+                "c30a65556a9875a0"
+            ]
+        ]
+    },
+    {
+        "id": "c30a65556a9875a0",
+        "type": "change",
+        "z": "8db04b315cc5de9b",
+        "name": "Set zero chart",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "[]",
+                "tot": "json"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 480,
+        "y": 420,
+        "wires": [
+            [
+                "e10e33185597b5bf",
+                "c936bad3c405d852",
+                "de50cbddaed42bb8"
+            ]
+        ]
+    },
+    {
+        "id": "c936bad3c405d852",
+        "type": "ui_chart",
+        "z": "8db04b315cc5de9b",
+        "name": "",
+        "group": "9f9b8980189f4305",
+        "order": 0,
+        "width": "18",
+        "height": "5",
+        "label": "Y",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": "5",
+        "removeOlderPoints": "10000",
+        "removeOlderUnit": "60",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#ff7f0e",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 830,
+        "y": 280,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "de50cbddaed42bb8",
+        "type": "ui_chart",
+        "z": "8db04b315cc5de9b",
+        "name": "",
+        "group": "9f9b8980189f4305",
+        "order": 0,
+        "width": "18",
+        "height": "5",
+        "label": "Z",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": "5",
+        "removeOlderPoints": "10000",
+        "removeOlderUnit": "60",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#d62728",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 830,
+        "y": 320,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "9f9b8980189f4305",
+        "type": "ui_group",
+        "name": "Quake Playback v2",
+        "tab": "a8c4d67d175f66cb",
+        "order": 2,
+        "disp": true,
+        "width": "18",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "a8c4d67d175f66cb",
+        "type": "ui_tab",
+        "name": "Quake playback v2",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    }
+]
